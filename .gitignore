@@ -8,4 +8,10 @@ __pycache__/
 *.pyc
 *.cpython-*.pyc
 
-
+# Other (log files, ...)
+grid_configs/
+*.csv
+*.png
+*.jpg
+*.jpeg
+*.txt
