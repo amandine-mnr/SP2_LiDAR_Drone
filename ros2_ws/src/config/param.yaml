@@ -1,0 +1,39 @@
+
+drone_localizer:
+  ros__parameters:
+
+    lidar_x: 0.5
+    lidar_y: 1.5
+    lidar_z: 0.5
+
+    lidar_noise_std: 0.02
+    bg_threshold: 0.15
+
+    n_background_frames: 4
+
+    drone_size: 0.092
+    size_margin: 0.3
+
+    dbscan_min_samples: 1
+
+    roi_min_radius: 0.4
+    roi_max_radius: 2.5
+    roi_factor: 0.9
+
+    memory_len: 7
+    history_predict_min: 3
+    mahalanobis_gate: 11.34
+
+crazyflie_polynomial_trajectory:
+  ros__parameters:
+
+    max_length: 1.5
+    max_width: 1.0
+    max_delta_z: 0.15
+    base_altitude: 1.0
+
+    # wp_threshold: 0.2
+    kp: 2.0
+    speed_limit: 1.0
+    waypoint_spacing : 0.1
+

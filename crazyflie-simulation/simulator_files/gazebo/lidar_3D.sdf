@@ -1,0 +1,60 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+
+  <model name="3D_lidar_model">
+    <static>true</static>
+
+    <link name="3Dlidar_link">
+        <visual name="3Dlidar_visual">
+          <geometry>
+            <cylinder>
+              <radius>0.05</radius>
+              <length>0.1</length>
+            </cylinder>
+          </geometry>
+          <material>
+            <ambient>0 0 1 1</ambient>
+            <diffuse>0 0 1 1</diffuse>
+          </material>
+        </visual>
+
+      <sensor name="3D_lidar" type="gpu_lidar">
+        <always_on>1</always_on>
+        <update_rate>10</update_rate>
+        <topic>my_3D_lidar</topic>
+
+        <lidar>
+          <scan>
+
+            <horizontal>
+              <samples>1024</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159</min_angle>
+              <max_angle>3.14159</max_angle>
+            </horizontal>
+
+            <vertical>
+              <samples>64</samples>
+              <resolution>1</resolution>
+              <min_angle>-0.79</min_angle>
+              <max_angle>0.79</max_angle>
+            </vertical> <!-- ouster os0 -->
+
+          </scan>
+
+          <range>
+            <min>0.1</min>
+            <max>75.0</max>
+          </range>
+
+        </lidar>
+
+        <visualize>true</visualize>
+
+      </sensor>
+
+    </link>
+
+  </model>
+
+</sdf>

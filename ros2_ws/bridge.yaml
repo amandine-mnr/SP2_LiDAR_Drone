@@ -1,0 +1,26 @@
+- ros_topic_name: "/crazyflie/gazebo/command/twist"
+  gz_topic_name: "/crazyflie/gazebo/command/twist"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/my_lidar"
+  gz_topic_name: "/my_lidar"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+
+- ros_topic_name: "/my_3D_lidar/points"
+  gz_topic_name: "/my_3D_lidar/points"
+  ros_type_name: "sensor_msgs/msg/PointCloud2"
+  gz_type_name: "gz.msgs.PointCloudPacked"
+
+- ros_topic_name: "/model/crazyflie/odometry"
+  gz_topic_name: "/model/crazyflie/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS

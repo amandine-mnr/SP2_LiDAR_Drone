@@ -1,0 +1,11 @@
+# ROS 2
+build/
+install/
+log/
+
+# Python cache
+__pycache__/
+*.pyc
+*.cpython-*.pyc
+
+
