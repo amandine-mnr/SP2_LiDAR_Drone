@@ -60,7 +60,7 @@ def generate_launch_description():
 
         # Gazebo Sim
         ExecuteProcess(
-            cmd=["gz", "sim", "-r", "worlds/crazyflie_world_main.sdf"],
+            cmd=["gz", "sim", "-r", "worlds/crazyflie_world_multiple_drones.sdf"],
             output="screen"
         ),
 

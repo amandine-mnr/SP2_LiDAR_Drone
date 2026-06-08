@@ -20,21 +20,21 @@
 
       <sensor name="3D_lidar" type="gpu_lidar">
         <always_on>1</always_on>
-        <update_rate>10</update_rate>
+        <update_rate>5</update_rate>
         <topic>my_3D_lidar</topic>
 
         <lidar>
           <scan>
 
             <horizontal>
-              <samples>1024</samples>
+              <samples>512</samples>
               <resolution>1</resolution>
               <min_angle>-3.14159</min_angle>
               <max_angle>3.14159</max_angle>
             </horizontal>
 
             <vertical>
-              <samples>64</samples>
+              <samples>128</samples>
               <resolution>1</resolution>
               <min_angle>-0.79</min_angle>
               <max_angle>0.79</max_angle>

@@ -11,9 +11,7 @@ from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Bool
 
-DRONE_START_POSE = np.array([0.0, 0.0, 0.0])
-
-class CrazyflieTrajectory(Node):
+class CrazyfliePolynomialTrajectory(Node):
 
     def __init__(self):
         super().__init__('crazyflie_polynomial_trajectory')
@@ -23,29 +21,46 @@ class CrazyflieTrajectory(Node):
         self.declare_parameter('max_delta_z', 0.4)
         self.declare_parameter('base_altitude', 1.0)
 
-        self.declare_parameter('num_waypoints', 60)
-        # self.declare_parameter('wp_threshold', 0.15)
+        self.declare_parameter('num_waypoints', 30)
+        self.declare_parameter('wp_threshold', 0.15)
         self.declare_parameter('kp', 1.2)
         self.declare_parameter('speed_limit', 0.9)
-        self.declare_parameter('waypoint_spacing', 0.05)
 
         self.max_length = self.get_parameter('max_length').value
         self.max_width = self.get_parameter('max_width').value
         self.max_delta_z = self.get_parameter('max_delta_z').value
         self.base_altitude = self.get_parameter('base_altitude').value
         self.num_waypoints = self.get_parameter('num_waypoints').value
-        # self.wp_threshold = self.get_parameter('wp_threshold').value
+        self.wp_threshold = self.get_parameter('wp_threshold').value
         self.kp = self.get_parameter('kp').value
         self.speed_limit = self.get_parameter('speed_limit').value
-        self.waypoint_spacing = self.get_parameter('waypoint_spacing').value
 
-        self.wp_threshold = (0.2/2.2)*self.kp
+        self.drones = [
+            "crazyflie1",
+            "crazyflie2",
+            "crazyflie3"
+        ]
 
-        #publisher : velocity commands
-        self.pub = self.create_publisher(Twist, '/crazyflie/gazebo/command/twist', 10)
+        self.drones_start_pos = {
+            "crazyflie1": np.array([0.0, 0.0, 0.0]),
+            "crazyflie2": np.array([1.0, 0.0, 0.0]),
+            "crazyflie3": np.array([0.0, -1.0, 0.0])
+        }
 
-        #subscriber : odometry
-        self.sub = self.create_subscription(Odometry, '/model/crazyflie/odometry', self.odometry_callback, 10)
+        #publishers : velocity commands
+        self.publishers_dict = {}
+        for drone in self.drones:
+            self.publishers_dict[drone] = self.create_publisher(Twist, f'/{drone}/gazebo/command/twist',10)
+
+        self.current_pose = {drone: None for drone in self.drones}
+
+        self.current_wp = {drone: 0 for drone in self.drones}
+
+        #subscribers : odometry
+        self.odom_sub = []
+        for drone in self.drones:
+            sub = self.create_subscription(Odometry, f'/model/{drone}/odometry', lambda msg, d=drone: self.odometry_callback(msg, d), 10)
+            self.odom_sub.append(sub)
 
         #suscriber : shutdown (from supervisor)
         self.shutdown_sub = self.create_subscription(Bool, '/system_shutdown', self.shutdown_callback, 10)
@@ -57,9 +72,6 @@ class CrazyflieTrajectory(Node):
 
         self.localization_ready = False
         self.shutdown_flag = False
-        self.current_pose = None
-        self.current_wp = 0
-        self.takeoff_done = False
 
         if sys.stdin.isatty():
             self.settings = termios.tcgetattr(sys.stdin)
@@ -76,8 +88,8 @@ class CrazyflieTrajectory(Node):
             self.localization_ready = True
             self.get_logger().info("Localization ready, starting drone controller")
 
-    def odometry_callback(self, msg):
-        self.current_pose = (
+    def odometry_callback(self, msg, drone):
+        self.current_pose[drone] = (
             msg.pose.pose.position.x,
             msg.pose.pose.position.y,
             msg.pose.pose.position.z
@@ -88,7 +100,8 @@ class CrazyflieTrajectory(Node):
             self.get_logger().info("Shutdown received")
             self.shutdown_flag = True
             stop = Twist()
-            self.pub.publish(stop)
+            for drone in self.drones:
+                self.publishers_dict[drone].publish(stop)
 
     def get_key(self):
 
@@ -112,50 +125,30 @@ class CrazyflieTrajectory(Node):
 
     def generate_trajectory(self):
 
-        theta_dense = np.linspace(0.0, 2.0 * np.pi, 20000)
-
-        x_dense = self.max_length * np.cos(theta_dense)
-        y_dense = self.max_width * np.sin(theta_dense)
-        z_dense = (self.base_altitude + self.max_delta_z * np.sin(2.0 * theta_dense))
-
-        #3D arc length
-        dx = np.diff(x_dense)
-        dy = np.diff(y_dense)
-        dz = np.diff(z_dense)
-
-        ds = np.sqrt(dx**2 + dy**2 + dz**2)
-        cumulative_s = np.concatenate(([0.0], np.cumsum(ds)))
-
-        total_length = cumulative_s[-1]
-
-        #sample at constant distance intervals
-        sample_s = np.arange(0.0, total_length, self.waypoint_spacing)
-
-        #convert arc length back to theta
-        theta_samples = np.interp(sample_s, cumulative_s, theta_dense)
-
-        #generate waypoints
         self.waypoints = []
 
-        for theta in theta_samples:
+        for i in range(self.num_waypoints):
+
+            u = i / self.num_waypoints
+
+            theta = 2.0 * np.pi * u
+
             x = self.max_length * np.cos(theta)
+
             y = self.max_width * np.sin(theta)
-            z = (self.base_altitude + self.max_delta_z * np.sin(2.0 * theta))
 
-            self.waypoints.append(np.array([x + DRONE_START_POSE[0], y + DRONE_START_POSE[1], z], dtype=float))
+            z = (
+                self.base_altitude
+                + self.max_delta_z
+                * np.sin(2.0 * theta)
+            )
 
-        #close the loop
-        if len(self.waypoints) > 0:
-            self.waypoints.append(self.waypoints[0].copy())
-
-        #find starting point
-        waypoints_np = np.array(self.waypoints)
-        self.current_wp = int(np.argmin(np.linalg.norm(waypoints_np - DRONE_START_POSE, axis=1)))
+            self.waypoints.append(
+                np.array([x, y, z])
+            )
 
         self.get_logger().info(
-            f"Generated {len(self.waypoints)} waypoints "
-            f"with {self.waypoint_spacing:.2f} m spacing "
-            f"(trajectory length: {total_length:.2f} m)"
+            f"Generated {len(self.waypoints)} waypoints"
         )
 
     def control_loop(self):
@@ -165,80 +158,70 @@ class CrazyflieTrajectory(Node):
         if not self.localization_ready:
             return
 
-        if self.current_pose is None:
-            return
-
         key = self.get_key()
         if key == '\x03':
             self.shutdown_flag = True
             return
 
-        target = self.waypoints[self.current_wp]
-        next_target = self.waypoints[(self.current_wp + 1) % len(self.waypoints)]
+        for drone in self.drones:
 
-        x, y, z = self.current_pose
+            if self.current_pose[drone] is None:
+                continue
 
-        # Takeoff
-        if ((z < self.base_altitude-self.max_delta_z) and (self.takeoff_done == False)):
+            target = (self.waypoints[self.current_wp[drone]] + self.drones_start_pos[drone])
+
+            x, y, z = self.current_pose[drone]
+
+            dx = target[0] - x
+            dy = target[1] - y
+            dz = target[2] - z
+
+            distance = math.sqrt(
+                dx * dx +
+                dy * dy +
+                dz * dz
+            )
+
+            if distance < self.wp_threshold:
+                self.current_wp[drone] = (self.current_wp[drone] + 1) % len(self.waypoints)
+                continue
+
             msg = Twist()
-            msg.linear.x = 0.0
-            msg.linear.y = 0.0
-            msg.linear.z = 0.5
-            self.pub.publish(msg)
-            return
-        self.takeoff_done = True
 
-        dx = target[0] - x
-        dy = target[1] - y
-        dz = target[2] - z
+            msg.linear.x = np.clip(
+                self.kp * dx,
+                -self.speed_limit,
+                self.speed_limit
+            )
 
-        dx_next = next_target[0] - x
-        dy_next = next_target[1] - y
-        dz_next = next_target[2] - z
+            msg.linear.y = np.clip(
+                self.kp * dy,
+                -self.speed_limit,
+                self.speed_limit
+            )
 
-        distance = math.sqrt(dx*dx + dy*dy + dz*dz)
-        distance_next = math.sqrt(dx_next*dx_next + dy_next*dy_next + dz_next*dz_next)
+            msg.linear.z = np.clip(
+                self.kp * dz,
+                -self.speed_limit,
+                self.speed_limit
+            )
 
-        #switch waypoint when close
-        if (distance < self.wp_threshold) or (distance_next < self.wp_threshold):
-            self.current_wp = (self.current_wp + 1) % len(self.waypoints)
-            return
+            msg.angular.x = 0.0
+            msg.angular.y = 0.0
+            msg.angular.z = 0.0
 
-        msg = Twist()
-
-        msg.linear.x = np.clip(
-            self.kp * dx_next,
-            -self.speed_limit,
-            self.speed_limit
-        )
-
-        msg.linear.y = np.clip(
-            self.kp * dy_next,
-            -self.speed_limit,
-            self.speed_limit
-        )
-
-        msg.linear.z = np.clip(
-            self.kp * dz_next,
-            -self.speed_limit,
-            self.speed_limit
-        )
-
-        msg.angular.x = 0.0
-        msg.angular.y = 0.0
-        msg.angular.z = 0.0
-
-        self.pub.publish(msg)
+            self.publishers_dict[drone].publish(msg)
 
     def destroy_node(self):
         stop = Twist()
-        self.pub.publish(stop)
+        for drone in self.drones:
+            self.publishers_dict[drone].publish(stop)
         super().destroy_node()
 
 
 def main():
     rclpy.init()
-    node = CrazyflieTrajectory()
+    node = CrazyfliePolynomialTrajectory()
 
     try:
         while rclpy.ok():

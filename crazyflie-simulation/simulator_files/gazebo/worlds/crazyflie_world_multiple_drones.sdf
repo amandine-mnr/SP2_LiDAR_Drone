@@ -15,7 +15,7 @@ Copyright (c) 2022 Bitcraze
   <world name="crazyflie_world">
     <physics name="1ms" type="ode">
       <max_step_size>0.001</max_step_size>
-      <real_time_factor>0.0</real_time_factor>
+      <real_time_factor>0.04</real_time_factor>
     </physics>
     <plugin
       filename="gz-sim-physics-system"
@@ -94,7 +94,7 @@ Copyright (c) 2022 Bitcraze
     <include>
       <uri>model://crazyflie3</uri>
       <name>crazyflie3</name>
-      <pose>0 1 0 0 0 0</pose>
+      <pose>0 -1 0 0 0 0</pose>
     </include>
 
     <!-- Lidar 3D -->

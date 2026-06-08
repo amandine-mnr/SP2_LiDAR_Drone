@@ -2,6 +2,16 @@
 drone_localizer:
   ros__parameters:
 
+    odom_topics:
+      - /model/crazyflie1/odometry
+      - /model/crazyflie2/odometry
+      - /model/crazyflie3/odometry
+
+    drone_start_pose: 
+      - '(0.0, 0.0, 0.0)'
+      - '(0.0, 0.0, 0.0)'
+      - '(0.0, 0.0, 0.0)'
+
     lidar_x: 0.5
     lidar_y: 1.5
     lidar_z: 0.5
@@ -32,8 +42,8 @@ crazyflie_polynomial_trajectory:
     max_delta_z: 0.15
     base_altitude: 1.0
 
-    # wp_threshold: 0.2
-    kp: 2.0
-    speed_limit: 1.0
-    waypoint_spacing : 0.1
+    num_waypoints: 30
+    wp_threshold: 0.15
+    kp: 1.2
+    speed_limit: 0.9
 

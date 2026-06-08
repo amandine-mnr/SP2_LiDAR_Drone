@@ -8,10 +8,9 @@ Panels:
         - /Status1
         - /Grid1
         - /PointCloud21
-        - /PointStamped1
-        - //roi_marker1
-        - //roi_marker1/Status1
-        - //roi_marker1/Topic1
+        - /tracks_roi1
+        - /tracks_roi1/Topic1
+        - /tracks_pos1
       Splitter Ratio: 0.5
     Tree Height: 707
   - Class: rviz_common/Selection
@@ -86,33 +85,30 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
-    - Alpha: 1
-      Class: rviz_default_plugins/PointStamped
-      Color: 116; 78; 196
-      Enabled: true
-      History Length: 1
-      Name: PointStamped
-      Radius: 0.10000000149011612
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Reliable
-        Value: /drone_position
-      Value: true
     - Class: rviz_default_plugins/Marker
       Enabled: true
-      Name: /roi_marker
+      Name: tracks_roi
       Namespaces:
-        drone_roi: true
+        {}
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /roi_marker
+        Value: /roi_markers
+      Value: true
+    - Class: rviz_default_plugins/MarkerArray
+      Enabled: true
+      Name: tracks_pos
+      Namespaces:
+        drone_track: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /track_markers
       Value: true
   Enabled: true
   Global Options:
@@ -175,10 +171,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.609796941280365
+      Pitch: 0.6147969961166382
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.328552782535553
+      Yaw: 0.6335517764091492
     Saved: ~
 Window Geometry:
   Displays:

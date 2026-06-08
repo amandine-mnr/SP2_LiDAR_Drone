@@ -8,7 +8,7 @@ class ExperimentSupervisor(Node):
     def __init__(self):
         super().__init__('experiment_supervisor')
 
-        self.duration = 240.0  #sec
+        self.duration = 80.0  #sec
 
         self.ready = False
         self.start_time = None

@@ -1,5 +1,17 @@
-- ros_topic_name: "/crazyflie/gazebo/command/twist"
-  gz_topic_name: "/crazyflie/gazebo/command/twist"
+- ros_topic_name: "/crazyflie1/gazebo/command/twist"
+  gz_topic_name: "/crazyflie1/gazebo/command/twist"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/crazyflie2/gazebo/command/twist"
+  gz_topic_name: "/crazyflie2/gazebo/command/twist"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+  direction: ROS_TO_GZ
+
+- ros_topic_name: "/crazyflie3/gazebo/command/twist"
+  gz_topic_name: "/crazyflie3/gazebo/command/twist"
   ros_type_name: "geometry_msgs/msg/Twist"
   gz_type_name: "gz.msgs.Twist"
   direction: ROS_TO_GZ
@@ -14,8 +26,18 @@
   ros_type_name: "sensor_msgs/msg/PointCloud2"
   gz_type_name: "gz.msgs.PointCloudPacked"
 
-- ros_topic_name: "/model/crazyflie/odometry"
-  gz_topic_name: "/model/crazyflie/odometry"
+- ros_topic_name: "/model/crazyflie1/odometry"
+  gz_topic_name: "/model/crazyflie1/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+
+- ros_topic_name: "/model/crazyflie2/odometry"
+  gz_topic_name: "/model/crazyflie2/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+
+- ros_topic_name: "/model/crazyflie3/odometry"
+  gz_topic_name: "/model/crazyflie3/odometry"
   ros_type_name: "nav_msgs/msg/Odometry"
   gz_type_name: "gz.msgs.Odometry"
 
